@@ -4,6 +4,57 @@ import (
 	"testing"
 )
 
+// Get country by mobile number only
+var mobWithLLCountryTests = []struct {
+	input    string
+	expected string
+}{
+	// landline numbers
+	{"3726347343", "EE"},
+	{"74997098833", "RU"},
+	{"37167881727", "LV"},
+	{"16466909997", "US"},
+	{"14378869667", "CA"},
+	{"12836907618", "US"},
+	{"13406407159", "VI"},
+	{"5117061970", "PE"},
+	{"862185551232", "CN"},
+	{"38391234999", "XK"},
+	{"26822123456", "SZ"},
+
+	// Mobile numbers
+	{"39339638066", "IT"},
+	{"37125641580", "LV"},
+	{"43663242739", "AT"},
+	{"21655886170", "TN"},
+	{"3197010280754", "NL"},
+	{"51999400500", "PE"},
+	{"8614855512329", "CN"},
+	{"38342224999", "XK"},
+	{"26876123456", "SZ"},
+	{"18251234567", "CA"},
+}
+
+func TestGetCountryForMobileNumberWithLandLine(t *testing.T) {
+	for _, tt := range mobWithLLCountryTests {
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+			country := GetISO3166ByNumber(tt.input, true)
+			if tt.expected == "" {
+				if country.CountryName != "" {
+					t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): must be empty, actual `%s`", tt.input, country.CountryName)
+				}
+			} else {
+				expected := getISO3166ByCountry(tt.expected)
+				if country.CountryName != expected.CountryName {
+					t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): expected `%s`, actual `%s`", tt.input, expected.CountryName, country.CountryName)
+				}
+			}
+		})
+	}
+}
+
 // Tests format mobile
 var mobFormatTests = []struct {
 	input    string
@@ -26,10 +77,14 @@ var mobFormatTests = []struct {
 
 func TestFormatMobile(t *testing.T) {
 	for _, tt := range mobFormatTests {
-		number := Parse(tt.input, tt.country)
-		if number != tt.expected {
-			t.Errorf("Parse(number=`%s`, country=`%s`): expected `%s`, actual `%s`", tt.input, tt.country, tt.expected, number)
-		}
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+			number := Parse(tt.input, tt.country)
+			if number != tt.expected {
+				t.Errorf("Parse(number=`%s`, country=`%s`): expected `%s`, actual `%s`", tt.input, tt.country, tt.expected, number)
+			}
+		})
 	}
 }
 
@@ -54,7 +109,7 @@ func TestFormatForLandLineIsEmpty(t *testing.T) {
 	for _, tt := range mobFormatTestsNegative {
 		number := Parse(tt.input, tt.country)
 		if number != "" {
-			t.Errorf("Parse(number=`%s`, country=`%s`) for landline number miust be empty, actual `%s`", tt.input, tt.country, number)
+			t.Errorf("Parse(number=`%s`, country=`%s`) for landline number must be empty, actual `%s`", tt.input, tt.country, number)
 		}
 	}
 }
@@ -88,6 +143,7 @@ var mobWithLLFormatTests = []struct {
 	{"+51 999 400 500", "PE", "51999400500"},
 	{"+86 (16) 855-512-329", "CN", "8616855512329"},
 	{"+383 4 1234999", "XK", "38341234999"},
+	{"+1 289 2999", "USA", ""},
 }
 
 func TestFormatWithLandLine(t *testing.T) {
@@ -95,50 +151,6 @@ func TestFormatWithLandLine(t *testing.T) {
 		number := ParseWithLandLine(tt.input, tt.country)
 		if number != tt.expected {
 			t.Errorf("Parse(number=`%s`, country=`%s`): expected `%s`, actual `%s`", tt.input, tt.country, tt.expected, number)
-		}
-	}
-}
-
-// Get country by mobile number only
-var mobWithLLCountryTests = []struct {
-	input    string
-	expected string
-}{
-	// landline numbers
-	{"3726347343", "EE"},
-	{"74997098833", "RU"},
-	{"37167881727", "LV"},
-	{"16466909997", "US"},
-	{"14378869667", "CA"},
-	{"12836907618", "US"},
-	{"13406407159", "VI"},
-	{"5117061970", "PE"},
-	{"862185551232", "CN"},
-	{"38391234999", "XK"},
-
-	// Mobile numbers
-	{"39339638066", "IT"},
-	{"37125641580", "LV"},
-	{"43663242739", "AT"},
-	{"21655886170", "TN"},
-	{"3197010280754", "NL"},
-	{"51999400500", "PE"},
-	{"8614855512329", "CN"},
-	{"38342224999", "XK"},
-}
-
-func TestGetCountryForMobileNumberWithLandLine(t *testing.T) {
-	for _, tt := range mobWithLLCountryTests {
-		country := GetISO3166ByNumber(tt.input, true)
-		if tt.expected == "" {
-			if country.CountryName != "" {
-				t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): must be empty, actual `%s`", tt.input, country.CountryName)
-			}
-		} else {
-			expected := getISO3166ByCountry(tt.expected)
-			if country.CountryName != expected.CountryName {
-				t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): expected `%s`, actual `%s`", tt.input, expected.CountryName, country.CountryName)
-			}
 		}
 	}
 }
@@ -252,10 +264,15 @@ var indiaMobileTests = []struct {
 
 func TestIndiaMobileNumber(t *testing.T) {
 	for _, tt := range indiaMobileTests {
-		country := GetISO3166ByNumber(tt.input, false)
-		if country.CountryName != "India" {
-			t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): expected `%s`, actual `%s`", tt.input, "India", country.CountryName)
-		}
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+
+			country := GetISO3166ByNumber(tt.input, false)
+			if country.CountryName != "India" {
+				t.Errorf("GetISO3166ByNumber(number=`%s`, withLandline=false): expected `%s`, actual `%s`", tt.input, "India", country.CountryName)
+			}
+		})
 	}
 }
 
@@ -321,5 +338,32 @@ func TestGetCountryForMobileNumber(t *testing.T) {
 			}
 		}
 
+	}
+}
+
+// Get country by mobile number only
+var mobileNumbers = []struct {
+	input    string
+	expected string
+}{
+	// Mobile numbers
+	{"39339638066", "IT"},
+	{"07933846223", "GB"},
+	{"14855512329", "CN"},
+}
+
+func TestGetISO3166ByMobileNumber(t *testing.T) {
+	for _, tt := range mobileNumbers {
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+			countries := GetISO3166ByMobileNumber(tt.input)
+			expected := getISO3166ByCountry(tt.expected)
+			for _, country := range countries {
+				if country.CountryName != expected.CountryName {
+					t.Errorf("GetISO3166ByMobileNumber(number=`%s`): expected `%s`, actual `%s`", tt.input, expected.CountryName, country.CountryName)
+				}
+			}
+		})
 	}
 }
