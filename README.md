@@ -1,7 +1,10 @@
 # phonenumber
+
 ![Coverage](https://img.shields.io/badge/Coverage-99.4%25-brightgreen)
 [![Run Tests](https://github.com/apifonica/phonenumber/actions/workflows/run-tests.yml/badge.svg)](https://github.com/apifonica/phonenumber/actions?query=branch%3Amaster)
 ## Description
+
+Up-to-date list of mobile phone number formats - https://www.itu.int/oth/T0202.aspx?lang=en&parent=T0202
 
 golang port of AfterShip/phone
 

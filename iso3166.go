@@ -190,7 +190,7 @@ func populateISO3166() {
 	i.Alpha3 = "BDI"
 	i.CountryCode = "257"
 	i.CountryName = "Burundi"
-	i.MobileBeginWith = []string{"7", "29"}
+	i.MobileBeginWith = []string{"6", "7"}
 	i.PhoneNumberLengths = []int{8}
 	iso3166Datas = append(iso3166Datas, i)
 
