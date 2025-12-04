@@ -119,39 +119,73 @@ var mobWithLLFormatTests = []struct {
 	input    string
 	country  string
 	expected string
+	valid    bool
+	mobile   bool
 }{
 	// Landline numbers
-	{"+371 (67) 881-727", "LV", "37167881727"},
-	{"00371 (67) 881-727", "LV", "37167881727"},
-	{"003726823000", "EE", "3726823000"},
-	{"+3726823000", "EE", "3726823000"},
-	{"3726823000", "EE", "3726823000"},
-	{"7499 709 88 33", "RU", "74997098833"},
-	{"22 (483) 53-34", "PL", "48224835334"},
-	{"48224835334", "PL", "48224835334"},
-	{"+51 (1) 706-19-70", "PE", "5117061970"},
-	{"+86 21 85-512-329", "CN", "862185512329"},
-	{"+383 9 1234999", "XK", "38391234999"},
+	{"+371 (67) 881-727", "LV", "37167881727", true, false},
+	{"00371 (67) 881-727", "LV", "37167881727", true, false},
+	{"003726823000", "EE", "3726823000", true, false},
+	{"+3726823000", "EE", "3726823000", true, false},
+	{"3726823000", "EE", "3726823000", true, false},
+	{"7499 709 88 33", "RU", "74997098833", true, false},
+	{"22 (483) 53-34", "PL", "48224835334", true, false},
+	{"48224835334", "PL", "48224835334", true, false},
+	{"+51 (1) 706-19-70", "PE", "5117061970", true, false},
+	{"+86 21 85-512-329", "CN", "862185512329", true, false},
+	{"+383 9 1234999", "XK", "38391234999", true, false},
 
 	// Mobile numbers
-	{"090 6135 3368", "JP", "819061353368"},
-	{"+8615948692360", "CN", "8615948692360"},
-	{"008615948692360", "CN", "8615948692360"},
-	{"(817) 569-8900", "USA", "18175698900"},
-	{"+371 25 641 580", "LV", "37125641580"},
-	{"00371 25 641 580", "LV", "37125641580"},
-	{"+51 999 400 500", "PE", "51999400500"},
-	{"+86 (16) 855-512-329", "CN", "8616855512329"},
-	{"+383 4 1234999", "XK", "38341234999"},
-	{"+1 289 2999", "USA", ""},
+	{"090 6135 3368", "JP", "819061353368", true, true},
+	{"81-9061353368", "JP", "819061353368", true, true},
+	{"+8615948692360", "CN", "8615948692360", true, true},
+	{"008615948692360", "CN", "8615948692360", true, true},
+	{"(817) 569-8900", "USA", "18175698900", true, true},
+	{"+371 25 641 580", "LV", "37125641580", true, true},
+	{"00371 25 641 580", "LV", "37125641580", true, true},
+	{"+51 999 400 500", "PE", "51999400500", true, true},
+	{"+86 (16) 855-512-329", "CN", "8616855512329", true, true},
+	{"+383 4 1234999", "XK", "38341234999", true, true},
+
+	// Invalid numbers/inputs
+	{"+1 289 2999", "USA", "", false, false},
+	{"8615948692360", "JP", "", false, false},
+	{"+123456", "US", "", false, false},
+	{"", "", "", false, false},
+	{"0", "US", "", false, false},
+	{"", "", "", false, false},
+	{"XK", "38341234999", "", false, false},
+	{"38341234999", "XXXK", "", false, false},
 }
 
 func TestFormatWithLandLine(t *testing.T) {
 	for _, tt := range mobWithLLFormatTests {
-		number := ParseWithLandLine(tt.input, tt.country)
-		if number != tt.expected {
-			t.Errorf("Parse(number=`%s`, country=`%s`): expected `%s`, actual `%s`", tt.input, tt.country, tt.expected, number)
-		}
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			number := ParseWithLandLine(tt.input, tt.country)
+			if number != tt.expected {
+				t.Errorf("Parse(number=`%s`, country=`%s`): expected `%s`, actual `%s`", tt.input, tt.country, tt.expected, number)
+			}
+		})
+	}
+}
+
+func TestFormatWithFlags(t *testing.T) {
+	for _, tt := range mobWithLLFormatTests {
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			parsed, valid, mobile := ParseWithFlags(tt.input, tt.country)
+
+			if parsed != tt.expected {
+				t.Errorf("ParseWithFlags(number=`%s`, country=`%s`): expected parsed `%s`, actual `%s`", tt.input, tt.country, tt.expected, parsed)
+			}
+			if valid != tt.valid {
+				t.Errorf("ParseWithFlags(number=`%s`, country=`%s`): expected valid `%t`, actual `%t`", tt.input, tt.country, tt.valid, valid)
+			}
+			if mobile != tt.mobile {
+				t.Errorf("ParseWithFlags(number=`%s`, country=`%s`): expected mobile `%t`, actual `%t`", tt.input, tt.country, tt.mobile, mobile)
+			}
+		})
 	}
 }
 

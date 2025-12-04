@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/dongri/phonenumber"
+	"github.com/apifonica/phonenumber"
 )
 
 func main() {

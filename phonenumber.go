@@ -15,12 +15,32 @@ var (
 
 // Parse mobile number by country
 func Parse(number string, country string) string {
-	return parseInternal(number, country, false)
+	parsed, iso3166 := parseInternal(number, country)
+	if validateMobileISO3166(parsed, iso3166) {
+		return parsed
+	}
+	return ""
 }
 
 // ParseWithLandLine is Parse mobile and landline number by country
 func ParseWithLandLine(number string, country string) string {
-	return parseInternal(number, country, true)
+	parsed, iso3166 := parseInternal(number, country)
+	if validateLandlineISO3166(parsed, iso3166) {
+		return parsed
+	}
+	return ""
+}
+
+// ParseWithFlags parses the number and returns two flags, indicating
+// whether the number is valid and whether it is mobile.
+func ParseWithFlags(number string, country string) (parsed string, valid bool, mobile bool) {
+	var iso3166 ISO3166
+	parsed, iso3166 = parseInternal(number, country)
+	valid, mobile = validatePhoneISO3166(parsed, iso3166)
+	if !valid {
+		parsed = ""
+	}
+	return
 }
 
 // GetISO3166ByNumber ...
@@ -67,13 +87,13 @@ func GetISO3166ByMobileNumber(number string) []ISO3166 {
 	return result
 }
 
-func parseInternal(number string, country string, landLineInclude bool) string {
+func parseInternal(number string, country string) (string, ISO3166) {
 	number = strings.Replace(number, " ", "", -1)
 	country = strings.Replace(country, " ", "", -1)
 
 	if strings.HasPrefix(number, "+") {
 		if country == "" {
-			return ""
+			return "", ISO3166{}
 		}
 	}
 
@@ -101,10 +121,8 @@ func parseInternal(number string, country string, landLineInclude bool) string {
 	if indexOfInt(len(number), iso3166.PhoneNumberLengths) != -1 {
 		number = iso3166.CountryCode + number
 	}
-	if validatePhoneISO3166(number, iso3166, landLineInclude) {
-		return number
-	}
-	return ""
+
+	return number, iso3166
 }
 
 func getISO3166ByCountry(country string) ISO3166 {
@@ -138,18 +156,8 @@ func getISO3166ByCountry(country string) ISO3166 {
 	return iso3166
 }
 
-func validatePhoneISO3166(number string, iso3166 ISO3166, withLandLine bool) bool {
+func validateMobileISO3166(number string, iso3166 ISO3166) bool {
 	if len(iso3166.PhoneNumberLengths) == 0 {
-		return false
-	}
-
-	if withLandLine {
-		r := getRegexpByCountryCode(iso3166.CountryCode)
-		for _, l := range iso3166.PhoneNumberLengths {
-			if r.MatchString(number) && len(number) == len(iso3166.CountryCode)+l {
-				return true
-			}
-		}
 		return false
 	}
 
@@ -166,6 +174,38 @@ func validatePhoneISO3166(number string, iso3166 ISO3166, withLandLine bool) boo
 		}
 	}
 	return false
+}
+
+func validateLandlineISO3166(number string, iso3166 ISO3166) bool {
+	if len(iso3166.PhoneNumberLengths) == 0 {
+		return false
+	}
+
+	r := getRegexpByCountryCode(iso3166.CountryCode)
+	for _, l := range iso3166.PhoneNumberLengths {
+		if r.MatchString(number) && len(number) == len(iso3166.CountryCode)+l {
+			return true
+		}
+	}
+	return false
+}
+
+func validatePhoneISO3166(number string, iso3166 ISO3166) (valid bool, mobile bool) {
+	if !validateLandlineISO3166(number, iso3166) {
+		valid = false
+		mobile = false
+		return
+	}
+
+	// Landline check passed, but maybe number is mobile
+	valid = true
+
+	if validateMobileISO3166(number, iso3166) {
+		// Mobile check passed
+		mobile = true
+	}
+
+	return
 }
 
 func indexOfString(word string, data []string) int {
