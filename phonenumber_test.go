@@ -156,6 +156,16 @@ var mobWithLLFormatTests = []struct {
 	{"", "", "", false, false},
 	{"XK", "38341234999", "", false, false},
 	{"38341234999", "XXXK", "", false, false},
+
+	// Edge cases
+	{"17123456789", "DE", "4917123456789", true, true},
+	{"4949123456789", "DE", "4949123456789", true, false},
+	{"550123456789", "BR", "550123456789", true, false},
+	{"555523456789", "BR", "555523456789", true, true},
+	{"55552345678", "BR", "", false, false},
+	{"70123456789", "KZ", "70123456789", true, false},
+	{"77723456789", "KZ", "77723456789", true, true},
+	{"07723456789", "KZ", "77723456789", true, true},
 }
 
 func TestFormatWithLandLine(t *testing.T) {

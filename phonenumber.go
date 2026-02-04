@@ -102,27 +102,58 @@ func parseInternal(number string, country string) (string, ISO3166) {
 
 	iso3166 := getISO3166ByCountry(country)
 
-	// if number starts with country code and includes leading zero, remove the leading zero
-	if strings.HasPrefix(number, iso3166.CountryCode) {
-		withoutCountryCode := strings.Replace(number, iso3166.CountryCode, "", 1)
-		if strings.HasPrefix(withoutCountryCode, "0") {
-			withoutCountryCode = strings.Replace(withoutCountryCode, "0", "", 1)
-		}
-		number = iso3166.CountryCode + withoutCountryCode
-	}
+	// Track if we stripped a leading zero (indicates local format input)
+	hadLeadingZero := strings.HasPrefix(number, "0")
 
+	// Strip leading zeros first (except for specific countries)
 	if indexOfString(iso3166.Alpha3, []string{"GAB", "CIV", "COG"}) == -1 {
 		number = leadZeroRegexp.ReplaceAllString(number, "")
 	}
 
+	// Handle Russia-specific local format
 	if iso3166.Alpha3 == "RUS" && len(number) == 11 && rusLocaleMobPrefixRegexp.MatchString(number) {
 		number = rusLocalePrefixRegexp.ReplaceAllString(number, "")
 	}
-	if indexOfInt(len(number), iso3166.PhoneNumberLengths) != -1 {
+
+	// Check if number is already a valid international number (has country code + valid local length)
+	// This handles edge cases where MobileBeginWith prefixes start with the same digits as CountryCode
+	if isValidInternationalLength(number, iso3166) {
+		return number, iso3166
+	}
+
+	startsWithCountryCode := strings.HasPrefix(number, iso3166.CountryCode)
+
+	// Prepend country code if:
+	// - number does NOT start with country code, OR
+	// - original input had leading zero (local format like "07723456789")
+	// AND length matches a valid local length
+	if (!startsWithCountryCode || hadLeadingZero) && indexOfInt(len(number), iso3166.PhoneNumberLengths) != -1 {
 		number = iso3166.CountryCode + number
+		return number, iso3166
+	}
+
+	// Handle case where number has country code followed by leading zero (e.g., "490301234567" → "49301234567")
+	if startsWithCountryCode {
+		withoutCountryCode := strings.Replace(number, iso3166.CountryCode, "", 1)
+		// Only strip leading zero if it results in a valid local length
+		if strings.HasPrefix(withoutCountryCode, "0") {
+			withoutZero := strings.Replace(withoutCountryCode, "0", "", 1)
+			if indexOfInt(len(withoutZero), iso3166.PhoneNumberLengths) != -1 {
+				number = iso3166.CountryCode + withoutZero
+			}
+		}
 	}
 
 	return number, iso3166
+}
+
+// isValidInternationalLength checks if a number starts with country code and has valid total length
+func isValidInternationalLength(number string, iso3166 ISO3166) bool {
+	if !strings.HasPrefix(number, iso3166.CountryCode) {
+		return false
+	}
+	localLen := len(number) - len(iso3166.CountryCode)
+	return indexOfInt(localLen, iso3166.PhoneNumberLengths) != -1
 }
 
 func getISO3166ByCountry(country string) ISO3166 {
