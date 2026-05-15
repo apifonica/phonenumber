@@ -73,6 +73,11 @@ var mobFormatTests = []struct {
 	{"+51 912 640 074", "PE", "51912640074"},
 	{"+86 18 855 512 329", "CN", "8618855512329"},
 	{"+383 4 555 4999", "XK", "38345554999"},
+	{"+52 55 1234 5678", "MX", "525512345678"},
+	{"55 1234 5678", "MX", "525512345678"},
+	{"525512345678", "MX", "525512345678"},
+	{"(33) 3456-7890", "MX", "523334567890"},
+	{"+52 81 2345 6789", "MX", "528123456789"},
 }
 
 func TestFormatMobile(t *testing.T) {
@@ -103,6 +108,7 @@ var mobFormatTestsNegative = []struct {
 	{"519264112", "PE"},
 	{"86178555123", "CN"},
 	{"383 9 3334999", "XK"},
+	{"+52 1 55 1234 5678", "MX"},
 }
 
 func TestFormatForLandLineIsEmpty(t *testing.T) {
@@ -166,6 +172,14 @@ var mobWithLLFormatTests = []struct {
 	{"70123456789", "KZ", "70123456789", true, false},
 	{"77723456789", "KZ", "77723456789", true, true},
 	{"07723456789", "KZ", "77723456789", true, true},
+
+	// Mexico
+	{"+52 55 1234 5678", "MX", "525512345678", true, true},
+	{"55 1234 5678", "MX", "525512345678", true, true},
+	{"525512345678", "MX", "525512345678", true, true},
+	{"+52 81 2345 6789", "MX", "528123456789", true, true},
+	{"+52 33 3456 7890", "MX", "523334567890", true, true},
+	{"+52 1 55 1234 5678", "MX", "", false, false},
 }
 
 func TestFormatWithLandLine(t *testing.T) {
@@ -351,6 +365,8 @@ var mobCountryTests = []struct {
 	{"8613855512329", "CN", true},
 	{"38361234999", "XK", true},
 	{"38387131611", "XK", true},
+	{"525512345678", "MX", true},
+	{"528123456789", "MX", true},
 }
 
 func TestGetCountryForMobileNumber(t *testing.T) {
@@ -394,6 +410,7 @@ var mobileNumbers = []struct {
 	{"39339638066", "IT"},
 	{"07933846223", "GB"},
 	{"14855512329", "CN"},
+	{"525512345678", "MX"},
 }
 
 func TestGetISO3166ByMobileNumber(t *testing.T) {

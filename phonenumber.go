@@ -88,8 +88,8 @@ func GetISO3166ByMobileNumber(number string) []ISO3166 {
 }
 
 func parseInternal(number string, country string) (string, ISO3166) {
-	number = strings.Replace(number, " ", "", -1)
-	country = strings.Replace(country, " ", "", -1)
+	number = strings.ReplaceAll(number, " ", "")
+	country = strings.ReplaceAll(country, " ", "")
 
 	if strings.HasPrefix(number, "+") {
 		if country == "" {
