@@ -230,7 +230,7 @@ func populateISO3166() {
 	i.Alpha3 = "BGR"
 	i.CountryCode = "359"
 	i.CountryName = "Bulgaria"
-	i.MobileBeginWith = []string{"87", "88", "89", "98", "99", "43"}
+	i.MobileBeginWith = []string{"437", "438", "439", "87", "88", "89", "98", "99"}
 	i.PhoneNumberLengths = []int{8, 9}
 	iso3166Datas = append(iso3166Datas, i)
 
@@ -606,7 +606,7 @@ func populateISO3166() {
 	i.Alpha3 = "FRA"
 	i.CountryCode = "33"
 	i.CountryName = "France"
-	i.MobileBeginWith = []string{"6", "7"}
+	i.MobileBeginWith = []string{"6", "73", "74", "75", "76", "77", "78"}
 	i.PhoneNumberLengths = []int{9}
 	iso3166Datas = append(iso3166Datas, i)
 
@@ -1135,7 +1135,7 @@ func populateISO3166() {
 	i.CountryCode = "95"
 	i.CountryName = "Myanmar"
 	i.MobileBeginWith = []string{"9"}
-	i.PhoneNumberLengths = []int{8}
+	i.PhoneNumberLengths = []int{8, 9, 10}
 	iso3166Datas = append(iso3166Datas, i)
 
 	i.Alpha2 = "ME"
@@ -1670,8 +1670,8 @@ func populateISO3166() {
 	i.Alpha3 = "THA"
 	i.CountryCode = "66"
 	i.CountryName = "Thailand"
-	i.MobileBeginWith = []string{"6", "8", "9"}
-	i.PhoneNumberLengths = []int{9}
+	i.MobileBeginWith = []string{"61", "62", "63", "64", "65", "66", "8", "9"}
+	i.PhoneNumberLengths = []int{8, 9}
 	iso3166Datas = append(iso3166Datas, i)
 
 	i.Alpha2 = "TJ"
@@ -1758,7 +1758,7 @@ func populateISO3166() {
 	i.Alpha3 = "TZA"
 	i.CountryCode = "255"
 	i.CountryName = "Tanzania, United Republic of"
-	i.MobileBeginWith = []string{"7", "6"}
+	i.MobileBeginWith = []string{"6", "7"}
 	i.PhoneNumberLengths = []int{9}
 	iso3166Datas = append(iso3166Datas, i)
 
@@ -1878,7 +1878,9 @@ func populateISO3166() {
 	i.Alpha3 = "ZAF"
 	i.CountryCode = "27"
 	i.CountryName = "South Africa"
-	i.MobileBeginWith = []string{"6", "7", "8"}
+	i.MobileBeginWith = []string{
+		"6", "70", "71", "72", "73", "74", "76", "77", "78", "79", "81", "82", "83", "84",
+	}
 	i.PhoneNumberLengths = []int{9}
 	iso3166Datas = append(iso3166Datas, i)
 
