@@ -1,5 +1,7 @@
 package phonenumber
 
+//go:generate go run ./internal/genmx
+
 // ISO3166 ...
 type ISO3166 struct {
 	Alpha2             string
@@ -8,12 +10,17 @@ type ISO3166 struct {
 	CountryName        string
 	MobileBeginWith    []string
 	PhoneNumberLengths []int
+
+	mobilePrefixes prefixSet
 }
 
 func init() {
 	// Run once during package initialization in order to avoid data races
 	// https://go.dev/doc/effective_go#init
 	populateISO3166()
+	for k := range iso3166Datas {
+		iso3166Datas[k].mobilePrefixes = newPrefixSet(iso3166Datas[k].MobileBeginWith)
+	}
 }
 
 var iso3166Datas []ISO3166
@@ -1094,7 +1101,7 @@ func populateISO3166() {
 	i.Alpha3 = "MEX"
 	i.CountryCode = "52"
 	i.CountryName = "Mexico"
-	i.MobileBeginWith = []string{"2", "3", "4", "5", "6", "7", "8", "9"}
+	i.MobileBeginWith = mxMobileBeginWith
 	i.PhoneNumberLengths = []int{10}
 	iso3166Datas = append(iso3166Datas, i)
 

@@ -21,6 +21,7 @@ var mobWithLLCountryTests = []struct {
 	{"862185551232", "CN"},
 	{"38391234999", "XK"},
 	{"26822123456", "SZ"},
+	{"525551234567", "MX"},
 
 	// Mobile numbers
 	{"39339638066", "IT"},
@@ -78,6 +79,8 @@ var mobFormatTests = []struct {
 	{"525512345678", "MX", "525512345678"},
 	{"(33) 3456-7890", "MX", "523334567890"},
 	{"+52 81 2345 6789", "MX", "528123456789"},
+	{"+52 55 4321 0000", "MX", "525543210000"}, // MPP block
+	{"33 1809 4999", "MX", "523318094999"},     // CPP half of a split block
 
 	// Bulgaria
 	{"+359 87 123 4567", "BG", "359871234567"},
@@ -132,6 +135,11 @@ var mobFormatTestsNegative = []struct {
 	{"86178555123", "CN"},
 	{"383 9 3334999", "XK"},
 	{"+52 1 55 1234 5678", "MX"},
+	{"+52 55 5123 4567", "MX"}, // FIJO block
+	{"81 1234 5678", "MX"},     // FIJO block
+	{"33 1809 5000", "MX"},     // FIJO half of a split block
+	{"55 0000 1234", "MX"},     // not assigned
+
 	{"+359 431 12345", "BG"}, // Stara Zagora region geographic
 	{"080 123 4567", "ZA"},   // toll free
 	{"087 123 4567", "ZA"},   // VoIP
@@ -210,6 +218,12 @@ var mobWithLLFormatTests = []struct {
 	{"+52 81 2345 6789", "MX", "528123456789", true, true},
 	{"+52 33 3456 7890", "MX", "523334567890", true, true},
 	{"+52 1 55 1234 5678", "MX", "", false, false},
+	{"+52 55 5123 4567", "MX", "525551234567", true, false},
+	{"+52 81 1234 5678", "MX", "528112345678", true, false},
+	{"+52 55 4321 0000", "MX", "525543210000", true, true},
+	{"+52 33 1809 4999", "MX", "523318094999", true, true},
+	{"+52 33 1809 5000", "MX", "523318095000", true, false},
+	{"+52 55 0000 1234", "MX", "525500001234", true, false},
 
 	// Landline vs mobile distinction by prefix
 	{"+359 2 123 4567", "BG", "35921234567", true, false},
@@ -409,6 +423,7 @@ var mobCountryTests = []struct {
 	{"38387131611", "XK", true},
 	{"525512345678", "MX", true},
 	{"528123456789", "MX", true},
+	{"525551234567", "MX", false},
 }
 
 func TestGetCountryForMobileNumber(t *testing.T) {

@@ -24,3 +24,22 @@ func BenchmarkParseWithLandLine(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkParse(b *testing.B) {
+	benchmarks := []struct {
+		number  string
+		country string
+	}{
+		{"+52 55 1234 5678", "MX"},
+		{"+52 55 5123 4567", "MX"},
+		{"+371 25 641 580", "LV"},
+		{"(817) 569-8900", "US"},
+	}
+	for _, bm := range benchmarks {
+		b.Run(bm.number, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				Parse(bm.number, bm.country)
+			}
+		})
+	}
+}

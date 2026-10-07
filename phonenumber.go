@@ -51,12 +51,8 @@ func GetISO3166ByNumber(number string, withLandLine bool) ISO3166 {
 		for _, l := range i.PhoneNumberLengths {
 			if r.MatchString(number) && len(number) == len(i.CountryCode)+l {
 				// Check match with mobile codes
-				for _, w := range i.MobileBeginWith {
-					rm := getRegexpByCountryCode(i.CountryCode + w)
-					if rm.MatchString(number) {
-						// Match by mobile codes
-						return i
-					}
+				if i.mobilePrefixes.hasPrefixOf(number[len(i.CountryCode):], 0) {
+					return i
 				}
 
 				// Match by country code only for landline numbers only
@@ -75,12 +71,8 @@ func GetISO3166ByMobileNumber(number string) []ISO3166 {
 	result := []ISO3166{}
 	for _, i := range GetISO3166() {
 		for _, l := range i.PhoneNumberLengths {
-			if len(number) == l {
-				for _, w := range i.MobileBeginWith {
-					if w != "" && strings.HasPrefix(number, w) {
-						result = append(result, i)
-					}
-				}
+			if len(number) == l && i.mobilePrefixes.hasPrefixOf(number, 1) {
+				result = append(result, i)
 			}
 		}
 	}
@@ -195,13 +187,8 @@ func validateMobileISO3166(number string, iso3166 ISO3166) bool {
 	r := getRegexpByCountryCode(iso3166.CountryCode)
 	number = r.ReplaceAllString(number, "")
 	for _, l := range iso3166.PhoneNumberLengths {
-		if l == len(number) {
-			for _, w := range iso3166.MobileBeginWith {
-				rm := getRegexpByCountryCode(w)
-				if rm.MatchString(number) {
-					return true
-				}
-			}
+		if l == len(number) && iso3166.mobilePrefixes.hasPrefixOf(number, 0) {
+			return true
 		}
 	}
 	return false
@@ -255,6 +242,33 @@ func indexOfInt(word int, data []int) int {
 		}
 	}
 	return -1
+}
+
+// prefixSet indexes MobileBeginWith so a lookup costs one map probe per
+// number digit, not one comparison per prefix (MX alone has tens of thousands).
+type prefixSet struct {
+	prefixes map[string]struct{}
+	maxLen   int
+}
+
+func newPrefixSet(prefixes []string) prefixSet {
+	s := prefixSet{prefixes: make(map[string]struct{}, len(prefixes))}
+	for _, p := range prefixes {
+		s.prefixes[p] = struct{}{}
+		s.maxLen = max(s.maxLen, len(p))
+	}
+	return s
+}
+
+// hasPrefixOf reports whether number starts with one of the prefixes that is
+// at least minLen digits long; with minLen 0 an empty prefix matches anything.
+func (s prefixSet) hasPrefixOf(number string, minLen int) bool {
+	for l := minLen; l <= min(len(number), s.maxLen); l++ {
+		if _, ok := s.prefixes[number[:l]]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 var rMap = map[string]*regexp.Regexp{}
