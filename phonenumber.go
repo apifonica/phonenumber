@@ -94,6 +94,15 @@ func parseInternal(number string, country string) (string, ISO3166) {
 
 	iso3166 := getISO3166ByCountry(country)
 
+	// A national prefix followed by a valid local length is unambiguously local format,
+	// even when the local number starts with the country code digits
+	if iso3166.NationalPrefix != "" && strings.HasPrefix(number, iso3166.NationalPrefix) {
+		local := strings.TrimPrefix(number, iso3166.NationalPrefix)
+		if indexOfInt(len(local), iso3166.PhoneNumberLengths) != -1 {
+			return iso3166.CountryCode + local, iso3166
+		}
+	}
+
 	// Track if we stripped a leading zero (indicates local format input)
 	hadLeadingZero := strings.HasPrefix(number, "0")
 

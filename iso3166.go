@@ -10,6 +10,9 @@ type ISO3166 struct {
 	CountryName        string
 	MobileBeginWith    []string
 	PhoneNumberLengths []int
+	// NationalPrefix is a trunk prefix of national-format numbers other than a plain
+	// leading zero, e.g. "06" in Hungary. Empty when the prefix is "0" or none.
+	NationalPrefix string
 
 	mobilePrefixes prefixSet
 }
@@ -805,9 +808,11 @@ func populateISO3166() {
 	i.Alpha3 = "HUN"
 	i.CountryCode = "36"
 	i.CountryName = "Hungary"
-	i.MobileBeginWith = []string{"20", "30", "50", "31", "71", "70"}
-	i.PhoneNumberLengths = []int{9, 12}
+	i.MobileBeginWith = []string{"20", "30", "31", "50", "70"}
+	i.PhoneNumberLengths = []int{8, 9, 12}
+	i.NationalPrefix = "06"
 	iso3166Datas = append(iso3166Datas, i)
+	i.NationalPrefix = ""
 
 	i.Alpha2 = "ID"
 	i.Alpha3 = "IDN"
@@ -1031,7 +1036,9 @@ func populateISO3166() {
 	i.CountryName = "Lithuania"
 	i.MobileBeginWith = []string{"6"}
 	i.PhoneNumberLengths = []int{8}
+	i.NationalPrefix = "8"
 	iso3166Datas = append(iso3166Datas, i)
+	i.NationalPrefix = ""
 
 	i.Alpha2 = "LU"
 	i.Alpha3 = "LUX"

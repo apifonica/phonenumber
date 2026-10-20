@@ -140,13 +140,16 @@ var mobFormatTestsNegative = []struct {
 	{"33 1809 5000", "MX"},     // FIJO half of a split block
 	{"55 0000 1234", "MX"},     // not assigned
 
-	{"+359 431 12345", "BG"}, // Stara Zagora region geographic
-	{"080 123 4567", "ZA"},   // toll free
-	{"087 123 4567", "ZA"},   // VoIP
-	{"02 123 4567", "TH"},    // Bangkok geographic
-	{"060 123 4567", "TH"},   // VoIP
-	{"07 01 23 45 67", "FR"}, // not allocated to mobile
-	{"07 91 23 45 67", "FR"}, // not allocated to mobile
+	{"+359 431 12345", "BG"},      // Stara Zagora region geographic
+	{"080 123 4567", "ZA"},        // toll free
+	{"087 123 4567", "ZA"},        // VoIP
+	{"02 123 4567", "TH"},         // Bangkok geographic
+	{"060 123 4567", "TH"},        // VoIP
+	{"07 01 23 45 67", "FR"},      // not allocated to mobile
+	{"07 91 23 45 67", "FR"},      // not allocated to mobile
+	{"06 1 234 5678", "HU"},       // Budapest geographic
+	{"06 21 123 4567", "HU"},      // nomadic
+	{"+36 71 1234 5678 90", "HU"}, // M2M
 }
 
 func TestFormatForLandLineIsEmpty(t *testing.T) {
@@ -178,10 +181,25 @@ var mobWithLLFormatTests = []struct {
 	{"+51 (1) 706-19-70", "PE", "5117061970", true, false},
 	{"+86 21 85-512-329", "CN", "862185512329", true, false},
 	{"+383 9 1234999", "XK", "38391234999", true, false},
+	{"8 37 012345", "LT", "37037012345", true, false},  // national prefix, local number starts with country code
+	{"06 36 123 456", "HU", "3636123456", true, false}, // national prefix, local number starts with country code
+	{"06 1 234 5678", "HU", "3612345678", true, false},
+	{"1 234 5678", "HU", "3612345678", true, false},
 
 	// Mobile numbers
 	{"090 6135 3368", "JP", "819061353368", true, true},
 	{"81-9061353368", "JP", "819061353368", true, true},
+	{"06 30 123 4567", "HU", "36301234567", true, true},
+	{"06301234567", "HU", "36301234567", true, true},
+	{"301234567", "HU", "36301234567", true, true},
+	{"+36 30 123 4567", "HU", "36301234567", true, true},
+	{"0036301234567", "HU", "36301234567", true, true},
+	{"36301234567", "HU", "36301234567", true, true},
+	{"8 612 34567", "LT", "37061234567", true, true},
+	{"861234567", "LT", "37061234567", true, true},
+	{"061234567", "LT", "37061234567", true, true},
+	{"+370 612 34567", "LT", "37061234567", true, true},
+	{"37061234567", "LT", "37061234567", true, true},
 	{"+8615948692360", "CN", "8615948692360", true, true},
 	{"008615948692360", "CN", "8615948692360", true, true},
 	{"(817) 569-8900", "USA", "18175698900", true, true},
@@ -236,6 +254,10 @@ var mobWithLLFormatTests = []struct {
 	{"+33 7 51 23 45 67", "FR", "33751234567", true, true},
 	{"+255 22 219 9760", "TZ", "255222199760", true, false},
 	{"+255 754 123 456", "TZ", "255754123456", true, true},
+	{"+36 1 234 5678", "HU", "3612345678", true, false},
+	{"+36 21 123 4567", "HU", "36211234567", true, false},        // nomadic
+	{"+36 71 1234 5678 90", "HU", "36711234567890", true, false}, // M2M
+	{"+36 50 123 4567", "HU", "36501234567", true, true},
 }
 
 func TestFormatWithLandLine(t *testing.T) {
