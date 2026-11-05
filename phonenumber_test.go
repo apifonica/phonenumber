@@ -104,6 +104,11 @@ var mobFormatTests = []struct {
 	// Tanzania
 	{"+255 754 123 456", "TZ", "255754123456"},
 	{"0682 123 456", "TZ", "255682123456"},
+	// Uzbekistan
+	{"+998 70 123 45 67", "UZ", "998701234567"},
+	{"+998 80 123 45 67", "UZ", "998801234567"},
+	{"+998 87 123 45 67", "UZ", "998871234567"},
+	{"+998 90 123 45 67", "UZ", "998901234567"},
 }
 
 func TestFormatMobile(t *testing.T) {
@@ -150,6 +155,8 @@ var mobFormatTestsNegative = []struct {
 	{"06 1 234 5678", "HU"},       // Budapest geographic
 	{"06 21 123 4567", "HU"},      // nomadic
 	{"+36 71 1234 5678 90", "HU"}, // M2M
+	{"+998 71 123 45 67", "UZ"},   // Tashkent city geographic
+	{"+998 55 123 45 67", "UZ"},   // SIP
 }
 
 func TestFormatForLandLineIsEmpty(t *testing.T) {
@@ -258,6 +265,8 @@ var mobWithLLFormatTests = []struct {
 	{"+36 21 123 4567", "HU", "36211234567", true, false},        // nomadic
 	{"+36 71 1234 5678 90", "HU", "36711234567890", true, false}, // M2M
 	{"+36 50 123 4567", "HU", "36501234567", true, true},
+	{"+998 71 123 45 67", "UZ", "998711234567", true, false},
+	{"+998 70 123 45 67", "UZ", "998701234567", true, true},
 }
 
 func TestFormatWithLandLine(t *testing.T) {
@@ -446,6 +455,10 @@ var mobCountryTests = []struct {
 	{"525512345678", "MX", true},
 	{"528123456789", "MX", true},
 	{"525551234567", "MX", false},
+	{"998711234567", "UZ", false},
+	{"998701234567", "UZ", true},
+	{"998801234567", "UZ", true},
+	{"998871234567", "UZ", true},
 }
 
 func TestGetCountryForMobileNumber(t *testing.T) {
